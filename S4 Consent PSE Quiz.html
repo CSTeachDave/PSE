@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSE Consent Assessment</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    #app-wrapper {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      overflow-auto;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      max-width: 800px;
+      width: 100%;
+      padding: 40px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      color: #333;
+      font-size: 28px;
+      margin: 0 0 10px 0;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .progress-bar {
+      background: #e0e0e0;
+      height: 8px;
+      border-radius: 4px;
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+
+    .question-container {
+      margin-bottom: 30px;
+    }
+
+    .question-number {
+      color: #667eea;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .question-text {
+      color: #333;
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 18px;
+      line-height: 1.6;
+    }
+
+    .question-type {
+      color: #999;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Multiple Choice & True/False */
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option {
+      padding: 14px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #f9f9f9;
+      font-size: 15px;
+      color: #333;
+    }
+
+    .option:hover {
+      border-color: #667eea;
+      background: #f5f3ff;
+    }
+
+    .option.selected {
+      border-color: #667eea;
+      background: #ede9fe;
+      color: #667eea;
+      font-weight: 500;
+    }
+
+    .option.correct {
+      border-color: #10b981;
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    .option.incorrect {
+      border-color: #ef4444;
+      background: #fef2f2;
+      color: #dc2626;
+    }
+
+    /* Matching */
+    .matching-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 20px;
+    }
+
+    .matching-column {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .matching-column-title {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .matching-item {
+      padding: 12px 14px;
+      background: #f9f9f9;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #333;
+      transition: all 0.2s ease;
+      margin-bottom: 8px;
+      user-select: none;
+    }
+
+    .matching-item:hover:not(.matched) {
+      border-color: #667eea;
+      background: #f5f3ff;
+    }
+
+    .matching-item.selected {
+      border-color: #667eea;
+      background: #ede9fe;
+      color: #667eea;
+      font-weight: 500;
+    }
+
+    .matching-item.matched {
+      border-color: #10b981;
+      background: #ecfdf5;
+      color: #059669;
+      cursor: default;
+      font-weight: 500;
+    }
+
+    .matching-item.incorrect-match {
+      border-color: #ef4444;
+      background: #fef2f2;
+      color: #dc2626;
+    }
+
+    /* Feedback */
+    .feedback {
+      margin-top: 16px;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback.correct {
+      background: #ecfdf5;
+      color: #059669;
+      border-left: 4px solid #10b981;
+    }
+
+    .feedback.incorrect {
+      background: #fef2f2;
+      color: #dc2626;
+      border-left: 4px solid #ef4444;
+    }
+
+    /* Buttons */
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+      justify-content: center;
+    }
+
+    button {
+      padding: 12px 28px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-next {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      flex: 1;
+      max-width: 200px;
+    }
+
+    .btn-next:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-next:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-restart {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .btn-restart:hover {
+      background: #d0d0d0;
+    }
+
+    /* Results Screen */
+    .results-screen {
+      text-align: center;
+    }
+
+    .results-score {
+      font-size: 56px;
+      font-weight: 700;
+      color: #667eea;
+      margin: 20px 0;
+    }
+
+    .results-feedback {
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .results-breakdown {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .breakdown-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      font-size: 15px;
+      color: #333;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .breakdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .breakdown-item strong {
+      color: #667eea;
+    }
+
+    /* Hidden */
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+
+      .header h1 {
+        font-size: 22px;
+      }
+
+      .question-text {
+        font-size: 16px;
+      }
+
+      .matching-container {
+        grid-template-columns: 1fr;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn-next {
+        max-width: 100%;
+      }
+
+      .results-score {
+        font-size: 40px;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <div id="app-wrapper">
+   <div class="container"><!-- Quiz Screen -->
+    <div id="quiz-screen">
+     <div class="header">
+      <h1>Understanding Consent</h1>
+      <p>PSE Assessment for Years 10-11</p>
+     </div>
+     <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+     </div>
+     <div id="question-display"></div>
+     <div class="button-group"><button class="btn-next" id="next-btn" onclick="nextQuestion()">Next Question</button>
+     </div>
+    </div><!-- Results Screen -->
+    <div id="results-screen" class="hidden">
+     <div class="results-screen">
+      <h1>Assessment Complete!</h1>
+      <div class="results-score" id="final-score">
+       0%
+      </div>
+      <div class="results-feedback" id="results-message"></div>
+      <div class="results-breakdown">
+       <div class="breakdown-item"><span>Questions Correct:</span> <strong id="correct-count">0 / 10</strong>
+       </div>
+       <div class="breakdown-item"><span>Your Score:</span> <strong id="score-percentage">0%</strong>
+       </div>
+      </div><button class="btn-restart" onclick="restartQuiz()">Retake Assessment</button>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    const quizData = [
+      {
+        id: 1,
+        type: 'multiple-choice',
+        question: 'Under UK law, what is the age of consent for sexual activity?',
+        options: [
+          { text: '16 years old', correct: true },
+          { text: '15 years old', correct: false },
+          { text: '17 years old', correct: false },
+          { text: '18 years old', correct: false }
+        ],
+        feedback: {
+          correct: 'Correct! Under the Sexual Offences Act 2003, the age of consent in the UK is 16 years old. This applies regardless of gender or sexual orientation.',
+          incorrect: 'Not quite. The age of consent in the UK is 16 years old under the Sexual Offences Act 2003. This is the legal age when someone can agree to sexual activity.'
+        }
+      },
+      {
+        id: 2,
+        type: 'true-false',
+        question: 'True or False: If someone doesn\'t say "no", that automatically means they\'ve consented to sexual activity.',
+        options: [
+          { text: 'True', correct: false },
+          { text: 'False', correct: true }
+        ],
+        feedback: {
+          correct: 'Correct! Consent must be active and clear. Silence, not saying no, or going along with something isn\'t consent. The other person should want and agree to what\'s happening.',
+          incorrect: 'Not quite. Consent requires clear, active agreement. Silence or not saying "no" is NOT consent. Both people should genuinely want what\'s happening and be able to communicate that freely.'
+        }
+      },
+      {
+        id: 3,
+        type: 'scenario',
+        question: 'Sam is at a party. They\'re kissing their partner, who then starts moving their hands towards Sam\'s pants. Sam freezes and doesn\'t say anything because they\'re embarrassed. Is this consent?',
+        options: [
+          { text: 'Yes, because Sam didn\'t say "stop"', correct: false },
+          { text: 'No, because Sam didn\'t clearly agree to this', correct: true },
+          { text: 'Yes, because they were kissing', correct: false },
+          { text: 'Maybe, it depends on the situation', correct: false }
+        ],
+        feedback: {
+          correct: 'Correct! Freezing or staying silent isn\'t consent. Real consent means someone actively wants something and says so clearly. Being embarrassed or uncomfortable is a sign to check in and make sure both people actually want to continue.',
+          incorrect: 'Not quite. This is an important scenario to understand: freezing, silence, or discomfort are NOT consent. Even if people were kissing, that doesn\'t mean they\'ve agreed to everything. They need to actively agree to each new step.'
+        }
+      },
+      {
+        id: 4,
+        type: 'multiple-choice',
+        question: 'Which of these is an example of sexual coercion?',
+        options: [
+          { text: 'Pressuring someone into sex by threatening to break up with them', correct: true },
+          { text: 'Asking someone if they want to have sex', correct: false },
+          { text: 'Respecting when someone says they\'re not ready', correct: false },
+          { text: 'Having an honest conversation about what you both want', correct: false }
+        ],
+        feedback: {
+          correct: 'Correct! Coercion uses pressure, threats, or manipulation to make someone do something they don\'t want to do. Threatening to leave someone if they don\'t have sex is a form of emotional abuse and coercion.',
+          incorrect: 'Not quite. Coercion means using pressure, threats, or manipulation to force someone into sexual activity against their will. Threatening to end a relationship if someone won\'t have sex is a clear example of coercion.'
+        }
+      },
+      {
+        id: 5,
+        type: 'matching',
+        question: 'Match each scenario to whether it shows healthy consent or NOT healthy consent:',
+        scenarios: [
+          { id: 'a', text: 'Both people have talked about what they\'re comfortable with' },
+          { id: 'b', text: 'One person keeps asking after the other says "no"' },
+          { id: 'c', text: 'Someone says "just let me try" and doesn\'t listen to boundaries' }
+        ],
+        labels: [
+          { id: '1', text: 'Healthy Consent' },
+          { id: '2', text: 'NOT Healthy Consent' }
+        ],
+        correctMatches: { 'a': '1', 'b': '2', 'c': '2' },
+        feedback: {
+          correct: 'Excellent! You\'ve identified the key signs of healthy vs. unhealthy consent. Communication, respect for boundaries, and listening when someone says no are essential.',
+          incorrect: 'Let\'s review: Healthy consent involves clear communication and respecting boundaries. NOT healthy consent includes pressuring after someone says no or ignoring boundaries.'
+        }
+      },
+      {
+        id: 6,
+        type: 'true-false',
+        question: 'True or False: If someone is drunk or using drugs, they can\'t give proper consent to sexual activity.',
+        options: [
+          { text: 'True', correct: true },
+          { text: 'False', correct: false }
+        ],
+        feedback: {
+          correct: 'Correct! Under UK law, someone who is significantly intoxicated or unable to make clear decisions can\'t properly consent. If someone can\'t think clearly, they can\'t agree to sex. This is taken very seriously by the law.',
+          incorrect: 'Not quite. This is actually correct under UK law: someone who is drunk, high, or unable to make clear decisions CAN\'T properly consent to sexual activity. It\'s an important legal and safety principle.'
+        }
+      },
+      {
+        id: 7,
+        type: 'scenario',
+        question: 'Jordan and Alex have been in a relationship for 2 years. They often have sex. One evening, Alex doesn\'t feel like being intimate, but Jordan keeps trying and says "You always want to, why not now?" What\'s happening here?',
+        options: [
+          { text: 'This is fine - they\'re in a long-term relationship', correct: false },
+          { text: 'This is pressuring and not respecting boundaries', correct: true },
+          { text: 'Alex is being unreasonable', correct: false },
+          { text: 'Consent doesn\'t matter once you\'re in a relationship', correct: false }
+        ],
+        feedback: {
+          correct: 'Correct! Consent is needed EVERY TIME, even in long-term relationships. Just because someone wanted sex before doesn\'t mean they want it now. Pressuring someone to have sex is wrong, regardless of relationship status.',
+          incorrect: 'Not quite. This is super important: Consent is needed EVERY SINGLE TIME, even in relationships. Someone can say no anytime, and that must be respected. The past doesn\'t determine the present.'
+        }
+      },
+      {
+        id: 8,
+        type: 'multiple-choice',
+        question: 'Which is a GOOD reason to have sex?',
+        options: [
+          { text: 'You genuinely want to and feel ready', correct: true },
+          { text: 'Your friends are all doing it', correct: false },
+          { text: 'Your partner will be upset if you don\'t', correct: false },
+          { text: 'You want to prove you\'re grown up', correct: false }
+        ],
+        feedback: {
+          correct: 'Correct! The only good reason to have sex is because YOU genuinely want to and feel ready. It should be about your own choice and feelings, not pressure, peer pressure, or trying to prove something.',
+          incorrect: 'Not quite. A good reason to have sex is because you genuinely want to and feel ready - it\'s about YOUR choice and desires, not external pressure or expectations from others.'
+        }
+      },
+      {
+        id: 9,
+        type: 'true-false',
+        question: 'True or False: Feeling scared, uncomfortable, or unsure are signs that you\'re not ready to have sex.',
+        options: [
+          { text: 'True', correct: true },
+          { text: 'False', correct: false }
+        ],
+        feedback: {
+          correct: 'Correct! If you\'re feeling scared, uncomfortable, pressured, or unsure, that\'s your gut telling you to wait. Being ready for sex means feeling comfortable, confident, and genuinely wanting it - not just going along with it.',
+          incorrect: 'Not quite. Feeling scared, uncomfortable, or unsure ARE important signals that something isn\'t right. Being ready for sex means feeling genuinely comfortable and wanting it, not just going along with it.'
+        }
+      },
+      {
+        id: 10,
+        type: 'scenario',
+        question: 'Casey and Morgan are at a festival. Morgan suggests they go back to a tent to have sex. Casey really likes Morgan but isn\'t sure if they\'re ready yet. Morgan says "I promise it\'ll be fine" and seems disappointed. What should Casey do?',
+        options: [
+          { text: 'Agree because they like Morgan and don\'t want them upset', correct: false },
+          { text: 'Be honest about not being ready, even if Morgan is disappointed', correct: true },
+          { text: 'Ask what their friends would do', correct: false },
+          { text: 'Wait and decide later', correct: false }
+        ],
+        feedback: {
+          correct: 'Correct! This is important: Your feelings matter MORE than worrying about disappointing someone else. You should always be honest about whether you\'re ready, even if the other person is disappointed. A respectful partner will understand.',
+          incorrect: 'Not quite. This is really important: You should ALWAYS be honest about whether you\'re ready, even if it disappoints the other person. Your comfort and readiness are more important than anyone else\'s feelings. A good partner will respect that.'
+        }
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let answers = {};
+    let selectedLeft = null;
+
+    function initializeQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      answers = {};
+      displayQuestion();
+    }
+
+    function displayQuestion() {
+      const q = quizData[currentQuestion];
+      const container = document.getElementById('question-display');
+      
+      updateProgress();
+      selectedLeft = null;
+      
+      let html = `
+        <div class="question-container">
+          <div class="question-number">Question ${currentQuestion + 1} of ${quizData.length}</div>
+          <div class="question-type">${q.type.replace('-', ' ')}</div>
+          <div class="question-text">${q.question}</div>
+      `;
+
+      if (q.type === 'multiple-choice' || q.type === 'true-false' || q.type === 'scenario') {
+        html += '<div class="options">';
+        q.options.forEach((opt, idx) => {
+          html += `<div class="option" onclick="selectOption(${idx})" data-index="${idx}">${opt.text}</div>`;
+        });
+        html += '</div>';
+      } else if (q.type === 'matching') {
+        html += `
+          <div class="matching-container">
+            <div class="matching-column">
+              <div class="matching-column-title">Scenarios</div>
+              ${q.scenarios.map(item => `<div class="matching-item" onclick="selectScenario('${item.id}')" data-scenario-id="${item.id}">${item.text}</div>`).join('')}
+            </div>
+            <div class="matching-column">
+              <div class="matching-column-title">Labels</div>
+              ${q.labels.map(item => `<div class="matching-item" onclick="selectLabel('${item.id}')" data-label-id="${item.id}">${item.text}</div>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      html += '<div class="feedback" id="feedback"></div>';
+      html += '</div>';
+      
+      container.innerHTML = html;
+      document.getElementById('next-btn').disabled = true;
+    }
+
+    function selectOption(idx) {
+      const options = document.querySelectorAll('.option');
+      
+      options.forEach(opt => opt.classList.remove('selected'));
+      options[idx].classList.add('selected');
+      
+      answers[currentQuestion] = idx;
+      document.getElementById('next-btn').disabled = false;
+    }
+
+    function selectScenario(scenarioId) {
+      const q = quizData[currentQuestion];
+      
+      const items = document.querySelectorAll('[data-scenario-id]');
+      items.forEach(item => item.classList.remove('selected'));
+      document.querySelector(`[data-scenario-id="${scenarioId}"]`).classList.add('selected');
+      
+      selectedLeft = scenarioId;
+    }
+
+    function selectLabel(labelId) {
+      if (!selectedLeft) return;
+      
+      const q = quizData[currentQuestion];
+      
+      if (!answers[currentQuestion]) {
+        answers[currentQuestion] = {};
+      }
+      
+      answers[currentQuestion][selectedLeft] = labelId;
+      
+      const scenarioItem = document.querySelector(`[data-scenario-id="${selectedLeft}"]`);
+      scenarioItem.classList.remove('selected');
+      scenarioItem.classList.add('matched');
+      scenarioItem.onclick = null;
+      scenarioItem.style.cursor = 'default';
+      
+      selectedLeft = null;
+      
+      const allMatched = q.scenarios.length === Object.keys(answers[currentQuestion]).length;
+      if (allMatched) {
+        document.getElementById('next-btn').disabled = false;
+      }
+    }
+
+    function nextQuestion() {
+      const q = quizData[currentQuestion];
+      const answer = answers[currentQuestion];
+
+      if (answer === undefined) {
+        alert('Please complete this question before continuing.');
+        return;
+      }
+
+      let isCorrect = false;
+
+      if (q.type === 'matching') {
+        isCorrect = Object.keys(answer).every(key => answer[key] === q.correctMatches[key]);
+      } else {
+        isCorrect = q.options[answer].correct;
+      }
+
+      const feedbackEl = document.getElementById('feedback');
+      
+      if (isCorrect) {
+        score++;
+        feedbackEl.className = 'feedback show correct';
+        feedbackEl.textContent = q.feedback.correct;
+      } else {
+        feedbackEl.className = 'feedback show incorrect';
+        feedbackEl.textContent = q.feedback.incorrect;
+      }
+
+      document.getElementById('next-btn').textContent = 'See Explanation';
+      document.getElementById('next-btn').onclick = () => {
+        currentQuestion++;
+        if (currentQuestion < quizData.length) {
+          displayQuestion();
+          document.getElementById('next-btn').textContent = 'Next Question';
+          document.getElementById('next-btn').onclick = nextQuestion;
+        } else {
+          showResults();
+        }
+      };
+    }
+
+    function updateProgress() {
+      const progress = ((currentQuestion) / quizData.length) * 100;
+      document.getElementById('progress-fill').style.width = progress + '%';
+    }
+
+    function showResults() {
+      const percentage = Math.round((score / quizData.length) * 100);
+      let message = '';
+
+      if (percentage >= 90) {
+        message = 'Excellent! You have a strong understanding of consent and healthy relationships. Keep this knowledge and use it to help others too.';
+      } else if (percentage >= 75) {
+        message = 'Good work! You understand the key concepts about consent. Take time to reflect on any areas where you\'d like to learn more.';
+      } else if (percentage >= 60) {
+        message = 'You\'ve got some understanding of consent, but there are important concepts to review. Consent and healthy relationships are crucial topics - take time to learn more.';
+      } else {
+        message = 'It\'s clear this is a new topic for you. That\'s okay - consent and healthy relationships are really important to understand. Review the feedback and consider talking to a trusted adult or counselor.';
+      }
+
+      document.getElementById('quiz-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.remove('hidden');
+      document.getElementById('final-score').textContent = percentage + '%';
+      document.getElementById('results-message').textContent = message;
+      document.getElementById('correct-count').textContent = score + ' / ' + quizData.length;
+      document.getElementById('score-percentage').textContent = percentage + '%';
+    }
+
+    function restartQuiz() {
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('quiz-screen').classList.remove('hidden');
+      initializeQuiz();
+    }
+
+    initializeQuiz();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c80f0d7c006bf0e',t:'MTc3MDExMTM1My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
