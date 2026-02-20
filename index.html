@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PSE Relationships Quiz</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Nunito', sans-serif; }
+    .fade-in { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .option-btn { transition: all 0.2s ease; }
+    .option-btn:hover:not(:disabled) { transform: translateY(-2px); }
+    .correct-answer { background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important; color: white !important; border-color: #059669 !important; }
+    .incorrect-answer { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important; color: white !important; border-color: #dc2626 !important; }
+    .progress-bar { transition: width 0.5s ease; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+ </head>
+ <body class="h-full">
+  <div id="app-wrapper" class="h-full w-full bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-800 overflow-auto">
+   <div class="min-h-full w-full flex items-center justify-center p-4 sm:p-6">
+    <div class="w-full max-w-2xl"><!-- Start Screen -->
+     <div id="start-screen" class="bg-white rounded-3xl shadow-2xl p-6 sm:p-10 fade-in">
+      <div class="text-center mb-8">
+       <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+        </svg>
+       </div>
+       <h1 id="quiz-title" class="text-2xl sm:text-3xl font-extrabold text-gray-800 mb-3">PSE Relationships Quiz</h1>
+       <p id="intro-text" class="text-gray-600 text-base sm:text-lg">Test your knowledge about consent, healthy relationships, and making informed decisions.</p>
+      </div>
+      <div class="space-y-4">
+       <div><label for="student-name" class="block text-sm font-semibold text-gray-700 mb-2">Enter your name to begin:</label> <input type="text" id="student-name" placeholder="Your full name" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none text-lg">
+        <p id="name-error" class="text-red-500 text-sm mt-2 hidden">Please enter your name to continue.</p>
+       </div><button id="start-btn" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all text-lg shadow-lg hover:shadow-xl"> Start Quiz 📝 </button>
+      </div>
+      <p class="text-center text-gray-500 text-sm mt-6">10 questions • Multiple choice • Instant feedback</p>
+     </div><!-- Quiz Screen -->
+     <div id="quiz-screen" class="hidden">
+      <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-8 fade-in"><!-- Progress -->
+       <div class="mb-6">
+        <div class="flex justify-between items-center mb-2"><span id="question-counter" class="text-sm font-semibold text-gray-600">Question 1 of 10</span> <span id="current-score" class="text-sm font-semibold text-purple-600">Score: 0/10</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-3">
+         <div id="progress-bar" class="progress-bar bg-gradient-to-r from-purple-500 to-indigo-500 h-3 rounded-full" style="width: 10%"></div>
+        </div>
+       </div><!-- Question -->
+       <div id="question-container">
+        <h2 id="question-text" class="text-lg sm:text-xl font-bold text-gray-800 mb-6"></h2>
+        <div id="options-container" class="space-y-3"></div>
+       </div><!-- Feedback -->
+       <div id="feedback-container" class="hidden mt-6 p-5 rounded-xl">
+        <div class="flex items-start gap-3">
+         <div id="feedback-icon" class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"></div>
+         <div>
+          <p id="feedback-title" class="font-bold text-lg"></p>
+          <p id="feedback-text" class="mt-1"></p>
+         </div>
+        </div>
+       </div><!-- Next Button --> <button id="next-btn" class="hidden w-full mt-6 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all text-lg"> Next Question → </button>
+      </div>
+     </div><!-- Results Screen -->
+     <div id="results-screen" class="hidden">
+      <div class="bg-white rounded-3xl shadow-2xl p-6 sm:p-10 fade-in">
+       <div class="text-center">
+        <div id="result-emoji" class="text-6xl mb-4"></div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-800 mb-2">Quiz Complete!</h2>
+        <p id="result-name" class="text-gray-600 mb-6"></p>
+        <div class="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl p-6 mb-6">
+         <p class="text-gray-600 mb-2">Your Score</p>
+         <p id="final-score" class="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-indigo-600"></p>
+        </div>
+        <p id="result-message" class="text-gray-600 mb-6"></p><button id="retake-btn" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-6 rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all text-lg"> Take Quiz Again 🔄 </button>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    // Quiz Questions
+    const questions = [
+      {
+        question: "What is the legal age of consent for sexual activity in the UK?",
+        options: ["14", "16", "18", "21"],
+        correct: 1,
+        explanations: {
+          correct: "That's right! In the UK, the age of consent is 16. This means it's illegal for anyone to engage in sexual activity with someone under 16, regardless of whether they say they agree to it.",
+          incorrect: "The correct answer is 16. In the UK, it's illegal for anyone to engage in sexual activity with someone under 16, regardless of whether they say they agree to it. This law exists to protect young people."
+        }
+      },
+      {
+        question: "What does 'consent' mean in the context of relationships?",
+        options: [
+          "Saying yes once and it applies forever",
+          "Freely agreeing to something without pressure, and being able to change your mind at any time",
+          "Going along with something because you feel you have to",
+          "Agreeing because your partner expects it"
+        ],
+        correct: 1,
+        explanations: {
+          correct: "Exactly! Consent must be freely given, informed, and can be withdrawn at any time. It's an ongoing conversation, not a one-time agreement.",
+          incorrect: "Consent means freely agreeing to something without pressure, and being able to change your mind at any time. It must be enthusiastic, ongoing, and can never be assumed from silence or past behaviour."
+        }
+      },
+      {
+        question: "Scenario: Jamie and Alex have been dating for 3 months. Jamie wants to become more physical, but Alex isn't sure. Jamie says 'If you really loved me, you would.' What is this an example of?",
+        options: [
+          "A normal part of relationships",
+          "Emotional pressure/manipulation",
+          "Good communication",
+          "Compromise"
+        ],
+        correct: 1,
+        explanations: {
+          correct: "Well done! This is emotional manipulation. Using guilt or questioning someone's love to pressure them into physical activity is never okay. A caring partner respects boundaries.",
+          incorrect: "This is emotional pressure/manipulation. Using guilt ('if you loved me') to pressure someone into physical activity is a form of coercion. A healthy partner would respect Alex's feelings and wait until they're both ready."
+        }
+      },
+      {
+        question: "Which of the following is a characteristic of a HEALTHY relationship?",
+        options: [
+          "One partner makes all the decisions",
+          "Checking each other's phones without permission",
+          "Both partners respect each other's boundaries and opinions",
+          "One partner gets jealous when the other spends time with friends"
+        ],
+        correct: 2,
+        explanations: {
+          correct: "Correct! Mutual respect, trust, and supporting each other's independence are key signs of a healthy relationship. Both partners should feel valued and heard.",
+          incorrect: "The correct answer is mutual respect for boundaries and opinions. Healthy relationships are built on trust, equality, good communication, and respecting each other's independence and individuality."
+        }
+      },
+      {
+        question: "Scenario: Sam is at a party and has had several alcoholic drinks. Someone they've just met suggests they go somewhere private together. Can Sam legally give consent?",
+        options: [
+          "Yes, if Sam says yes",
+          "Yes, because they're at a party",
+          "No, being intoxicated affects the ability to give legal consent",
+          "It depends on how much they've had to drink"
+        ],
+        correct: 2,
+        explanations: {
+          correct: "That's right! If someone is intoxicated, they cannot legally give consent. The law recognises that alcohol and drugs affect judgement and decision-making. Someone who engages in sexual activity with an intoxicated person may be committing a crime.",
+          incorrect: "A person who is intoxicated cannot legally give consent. Alcohol impairs judgement and decision-making. The law is clear: if someone is drunk, any 'agreement' they give is not valid consent."
+        }
+      },
+      {
+        question: "What are important factors to consider BEFORE deciding to have sex for the first time?",
+        options: [
+          "Whether your friends have done it",
+          "Emotional readiness, contraception, protection from STIs, and both partners genuinely wanting to",
+          "How long you've been together",
+          "Whether it's expected after a certain number of dates"
+        ],
+        correct: 1,
+        explanations: {
+          correct: "Excellent! These are all crucial considerations. Being emotionally ready, using protection, and ensuring enthusiastic consent from both partners are essential. There's no rush, and it's okay to wait.",
+          incorrect: "The most important factors are: emotional readiness, contraception, protection from STIs, and both partners genuinely wanting to. Peer pressure, relationship length, or expectations are NOT good reasons. It's a personal decision that both people should feel completely ready for."
+        }
+      },
+      {
+        question: "Scenario: Taylor's partner often criticises their appearance, tells them who they can be friends with, and constantly checks up on where they are. Taylor thinks it's because their partner loves them. What type of relationship is this?",
+        options: [
+          "A protective relationship",
+          "An unhealthy/controlling relationship",
+          "A normal teenage relationship",
+          "A sign of true love"
+        ],
+        correct: 1,
+        explanations: {
+          correct: "Correct. Controlling behaviour, constant criticism, and isolation from friends are warning signs of an unhealthy relationship. Love should never involve control or making someone feel bad about themselves.",
+          incorrect: "This is an unhealthy/controlling relationship. Criticism, controlling friendships, and constant checking up are warning signs of abuse. Real love involves trust, support, and respecting your partner's freedom."
+        }
+      },
+      {
+        question: "Which statement about consent is TRUE?",
+        options: [
+          "If someone doesn't say 'no', it means 'yes'",
+          "Consent given once applies to future occasions too",
+          "Someone can withdraw consent at any time, even during sexual activity",
+          "If you're in a relationship, you don't need to ask for consent"
+        ],
+        correct: 2,
+        explanations: {
+          correct: "Absolutely right! Consent can be withdrawn at ANY point. Even if something has started, anyone has the right to stop and their partner must respect that immediately.",
+          incorrect: "The true statement is that consent can be withdrawn at any time. Silence is not consent, past consent doesn't mean future consent, and being in a relationship doesn't remove the need for ongoing, enthusiastic agreement."
+        }
+      },
+      {
+        question: "What is the difference between consensual and non-consensual sexual activity?",
+        options: [
+          "There is no real difference",
+          "Consensual means both people freely agree; non-consensual means at least one person hasn't agreed or can't legally consent",
+          "It only matters if you're over 18",
+          "It's only non-consensual if physical force is used"
+        ],
+        correct: 1,
+        explanations: {
+          correct: "Exactly! Consensual activity involves free, enthusiastic agreement from everyone involved. Non-consensual activity is when someone hasn't agreed, has been pressured, or legally cannot consent (due to age, intoxication, etc.).",
+          incorrect: "Consensual means all people freely agree; non-consensual means someone hasn't agreed or can't legally consent. Non-consent doesn't require physical force - pressure, manipulation, or taking advantage of someone who's intoxicated are all forms of non-consent."
+        }
+      },
+      {
+        question: "Scenario: Morgan has been pressured by their partner to share intimate photos. Their partner says 'Everyone does it' and 'Don't you trust me?' What should Morgan do?",
+        options: [
+          "Send the photos to prove they trust their partner",
+          "Refuse, as sharing intimate images can have serious legal and personal consequences, and a loving partner wouldn't pressure them",
+          "Send them but ask their partner to delete them afterwards",
+          "Send them because everyone does it"
+        ],
+        correct: 1,
+        explanations: {
+          correct: "Well done! It's important to never feel pressured into sharing intimate images. It's illegal to share intimate images of under-18s, and once shared, you lose control of them. A respectful partner would never pressure you.",
+          incorrect: "Morgan should refuse. Sharing intimate images of anyone under 18 is illegal (even of yourself). A caring partner would never pressure someone to do this. Once images are shared, you lose control of them forever, and they could be used against you."
+        }
+      }
+    ];
+
+    // State
+    let currentQuestion = 0;
+    let score = 0;
+    let studentName = '';
+    let answers = [];
+    let isSubmitting = false;
+
+    // Default config
+    const defaultConfig = {
+      quiz_title: 'PSE Relationships Quiz',
+      intro_text: 'Test your knowledge about consent, healthy relationships, and making informed decisions.',
+      background_color: '#312e81',
+      card_color: '#ffffff',
+      text_color: '#1f2937',
+      primary_color: '#7c3aed',
+      accent_color: '#4f46e5'
+    };
+
+    // Element references
+    const startScreen = document.getElementById('start-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultsScreen = document.getElementById('results-screen');
+    const studentNameInput = document.getElementById('student-name');
+    const nameError = document.getElementById('name-error');
+    const startBtn = document.getElementById('start-btn');
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const feedbackContainer = document.getElementById('feedback-container');
+    const feedbackIcon = document.getElementById('feedback-icon');
+    const feedbackTitle = document.getElementById('feedback-title');
+    const feedbackText = document.getElementById('feedback-text');
+    const nextBtn = document.getElementById('next-btn');
+    const questionCounter = document.getElementById('question-counter');
+    const currentScoreEl = document.getElementById('current-score');
+    const progressBar = document.getElementById('progress-bar');
+    const retakeBtn = document.getElementById('retake-btn');
+
+    // Data handler for SDK
+    const dataHandler = {
+      onDataChanged(data) {
+        // Read-only display not needed for this quiz
+      }
+    };
+
+    // Initialize SDKs
+    async function initApp() {
+      // Initialize Element SDK
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange: async (config) => {
+            document.getElementById('quiz-title').textContent = config.quiz_title || defaultConfig.quiz_title;
+            document.getElementById('intro-text').textContent = config.intro_text || defaultConfig.intro_text;
+          },
+          mapToCapabilities: (config) => ({
+            recolorables: [
+              {
+                get: () => config.background_color || defaultConfig.background_color,
+                set: (value) => window.elementSdk.setConfig({ background_color: value })
+              },
+              {
+                get: () => config.card_color || defaultConfig.card_color,
+                set: (value) => window.elementSdk.setConfig({ card_color: value })
+              },
+              {
+                get: () => config.text_color || defaultConfig.text_color,
+                set: (value) => window.elementSdk.setConfig({ text_color: value })
+              },
+              {
+                get: () => config.primary_color || defaultConfig.primary_color,
+                set: (value) => window.elementSdk.setConfig({ primary_color: value })
+              },
+              {
+                get: () => config.accent_color || defaultConfig.accent_color,
+                set: (value) => window.elementSdk.setConfig({ accent_color: value })
+              }
+            ],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ['quiz_title', config.quiz_title || defaultConfig.quiz_title],
+            ['intro_text', config.intro_text || defaultConfig.intro_text]
+          ])
+        });
+      }
+
+      // Initialize Data SDK
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) {
+          console.error('Failed to initialize Data SDK');
+        }
+      }
+    }
+
+    // Start quiz
+    function startQuiz() {
+      studentName = studentNameInput.value.trim();
+      if (!studentName) {
+        nameError.classList.remove('hidden');
+        studentNameInput.classList.add('border-red-500');
+        return;
+      }
+      
+      nameError.classList.add('hidden');
+      studentNameInput.classList.remove('border-red-500');
+      
+      currentQuestion = 0;
+      score = 0;
+      answers = [];
+      
+      startScreen.classList.add('hidden');
+      quizScreen.classList.remove('hidden');
+      
+      displayQuestion();
+    }
+
+    // Display current question
+    function displayQuestion() {
+      const q = questions[currentQuestion];
+      
+      questionCounter.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+      currentScoreEl.textContent = `Score: ${score}/${questions.length}`;
+      progressBar.style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+      
+      questionText.textContent = q.question;
+      
+      optionsContainer.innerHTML = '';
+      q.options.forEach((option, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn w-full text-left p-4 border-2 border-gray-200 rounded-xl hover:border-purple-400 hover:bg-purple-50 font-medium text-gray-700 transition-all';
+        btn.innerHTML = `<span class="inline-block w-8 h-8 rounded-full bg-purple-100 text-purple-600 font-bold text-center leading-8 mr-3">${String.fromCharCode(65 + index)}</span>${option}`;
+        btn.addEventListener('click', () => selectAnswer(index));
+        optionsContainer.appendChild(btn);
+      });
+      
+      feedbackContainer.classList.add('hidden');
+      nextBtn.classList.add('hidden');
+    }
+
+    // Handle answer selection
+    function selectAnswer(selectedIndex) {
+      const q = questions[currentQuestion];
+      const isCorrect = selectedIndex === q.correct;
+      
+      answers.push({
+        question: currentQuestion + 1,
+        selected: q.options[selectedIndex],
+        correct: isCorrect
+      });
+      
+      if (isCorrect) {
+        score++;
+        currentScoreEl.textContent = `Score: ${score}/${questions.length}`;
+      }
+      
+      // Disable all options and highlight correct/incorrect
+      const buttons = optionsContainer.querySelectorAll('.option-btn');
+      buttons.forEach((btn, index) => {
+        btn.disabled = true;
+        btn.classList.remove('hover:border-purple-400', 'hover:bg-purple-50');
+        
+        if (index === q.correct) {
+          btn.classList.add('correct-answer');
+        } else if (index === selectedIndex && !isCorrect) {
+          btn.classList.add('incorrect-answer');
+        }
+      });
+      
+      // Show feedback
+      feedbackContainer.classList.remove('hidden');
+      
+      if (isCorrect) {
+        feedbackContainer.className = 'mt-6 p-5 rounded-xl bg-green-50 border-2 border-green-200';
+        feedbackIcon.className = 'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-green-500';
+        feedbackIcon.innerHTML = '<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+        feedbackTitle.className = 'font-bold text-lg text-green-800';
+        feedbackTitle.textContent = 'Correct! ✓';
+        feedbackText.className = 'mt-1 text-green-700';
+        feedbackText.textContent = q.explanations.correct;
+      } else {
+        feedbackContainer.className = 'mt-6 p-5 rounded-xl bg-red-50 border-2 border-red-200';
+        feedbackIcon.className = 'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-red-500';
+        feedbackIcon.innerHTML = '<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+        feedbackTitle.className = 'font-bold text-lg text-red-800';
+        feedbackTitle.textContent = 'Not quite right';
+        feedbackText.className = 'mt-1 text-red-700';
+        feedbackText.textContent = q.explanations.incorrect;
+      }
+      
+      nextBtn.classList.remove('hidden');
+      nextBtn.textContent = currentQuestion === questions.length - 1 ? 'See Results →' : 'Next Question →';
+    }
+
+    // Move to next question or show results
+    async function nextQuestion() {
+      currentQuestion++;
+      
+      if (currentQuestion >= questions.length) {
+        await showResults();
+      } else {
+        displayQuestion();
+      }
+    }
+
+    // Show final results and save data
+    async function showResults() {
+      quizScreen.classList.add('hidden');
+      resultsScreen.classList.remove('hidden');
+      
+      document.getElementById('result-name').textContent = `Well done, ${studentName}!`;
+      document.getElementById('final-score').textContent = `${score}/${questions.length}`;
+      
+      // Set emoji and message based on score
+      const percentage = (score / questions.length) * 100;
+      let emoji, message;
+      
+      if (percentage >= 90) {
+        emoji = '🌟';
+        message = 'Outstanding! You have an excellent understanding of healthy relationships and consent.';
+      } else if (percentage >= 70) {
+        emoji = '👏';
+        message = 'Great job! You have a good understanding of these important topics.';
+      } else if (percentage >= 50) {
+        emoji = '👍';
+        message = 'Good effort! Review the topics you found challenging and try again.';
+      } else {
+        emoji = '📚';
+        message = 'Keep learning! These are important topics to understand. Consider reviewing the material and trying again.';
+      }
+      
+      document.getElementById('result-emoji').textContent = emoji;
+      document.getElementById('result-message').textContent = message;
+      
+      // Save results to Data SDK
+      if (window.dataSdk) {
+        const resultData = {
+          student_name: studentName,
+          q1_answer: answers[0]?.selected || '',
+          q2_answer: answers[1]?.selected || '',
+          q3_answer: answers[2]?.selected || '',
+          q4_answer: answers[3]?.selected || '',
+          q5_answer: answers[4]?.selected || '',
+          q6_answer: answers[5]?.selected || '',
+          q7_answer: answers[6]?.selected || '',
+          q8_answer: answers[7]?.selected || '',
+          q9_answer: answers[8]?.selected || '',
+          q10_answer: answers[9]?.selected || '',
+          total_score: score,
+          submitted_at: new Date().toISOString()
+        };
+        
+        await window.dataSdk.create(resultData);
+      }
+    }
+
+    // Reset quiz
+    function retakeQuiz() {
+      resultsScreen.classList.add('hidden');
+      startScreen.classList.remove('hidden');
+      studentNameInput.value = '';
+    }
+
+    // Event listeners
+    startBtn.addEventListener('click', startQuiz);
+    studentNameInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') startQuiz();
+    });
+    nextBtn.addEventListener('click', nextQuestion);
+    retakeBtn.addEventListener('click', retakeQuiz);
+
+    // Initialize
+    initApp();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d0d2e34c2d4d7e8',t:'MTc3MTU4MTg3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
