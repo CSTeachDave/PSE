@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Literacy and Online Safety Quiz - S1 PSE</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .main-btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-questions {
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            color: #1a1a2e;
+        }
+
+        .btn-scenarios {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a5a);
+            color: #fff;
+        }
+
+        .btn-reset {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            color: #fff;
+        }
+
+        .main-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quiz-section {
+            display: none;
+        }
+
+        .quiz-section.active {
+            display: block;
+        }
+
+        .question-card {
+            background: rgba(255, 255, 255, 0.95);
+            color: #1a1a2e;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .question-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .question-number {
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+        }
+
+        .scenario-card .question-number {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a5a);
+        }
+
+        .question-text {
+            font-size: 1.15em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .scenario-context {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #ff6b6b;
+            font-style: italic;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: #fff;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            color: #2c3e50;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: #00d4ff;
+            background: #f0faff;
+            transform: translateX(5px);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+        }
+
+        .option-btn.correct {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border-color: #28a745;
+            color: #fff;
+        }
+
+        .option-btn.incorrect {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            border-color: #dc3545;
+            color: #fff;
+        }
+
+        .option-btn.show-correct {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border-color: #28a745;
+            color: #fff;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.correct {
+            background: linear-gradient(45deg, #d4edda, #c3e6cb);
+            border: 2px solid #28a745;
+            color: #155724;
+            display: block;
+        }
+
+        .feedback.incorrect {
+            background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+            border: 2px solid #dc3545;
+            color: #721c24;
+            display: block;
+        }
+
+        .feedback-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+        }
+
+        .score-container {
+            text-align: center;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            margin-top: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .score-display {
+            font-size: 3em;
+            font-weight: bold;
+            color: #00d4ff;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .score-message {
+            font-size: 1.3em;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #00d4ff, #00ff88);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .intro-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .intro-box h2 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+        }
+
+        .intro-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .intro-box li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .intro-box li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.6em;
+            }
+
+            .main-btn {
+                width: 100%;
+            }
+
+            .question-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 Digital Literacy & Online Safety</h1>
+            <p class="subtitle">S1 PSE Interactive Quiz</p>
+        </header>
+
+        <div class="intro-box" id="introBox">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Identify risks and benefits of using the internet</li>
+                <li>Assess potential risks of posting personal information on social media</li>
+                <li>Suggest ways young people can protect their safety online</li>
+                <li>Handle real-life digital drama scenarios</li>
+            </ul>
+        </div>
+
+        <div class="button-container">
+            <button class="main-btn btn-questions" id="startQuestions">📝 Knowledge Questions</button>
+            <button class="main-btn btn-scenarios" id="startScenarios">🎭 Real-Life Scenarios</button>
+            <button class="main-btn btn-reset" id="resetQuiz" style="display: none;">🔄 Start Again</button>
+        </div>
+
+        <div class="quiz-section" id="quizSection">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div id="questionsContainer"></div>
+            <div class="score-container" id="scoreContainer" style="display: none;">
+                <div class="score-display" id="scoreDisplay"></div>
+                <div class="score-message" id="scoreMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Bank of 20 Knowledge Questions
+        const knowledgeQuestions = [
+            {
+                question: "What is one major benefit of using the internet for schoolwork?",
+                options: [
+                    "You can copy and paste everything without thinking",
+                    "You can access educational resources and research information quickly",
+                    "You don't need to go to school anymore",
+                    "Teachers can't check if you've done your work"
+                ],
+                correct: 1,
+                explanation: "The internet provides quick access to educational resources, online libraries, and research materials that can help with learning and schoolwork."
+            },
+            {
+                question: "Which of the following is a risk of sharing your location on social media?",
+                options: [
+                    "Your friends might want to meet up",
+                    "Your battery might drain faster",
+                    "Strangers could find out where you are or where you live",
+                    "Your photos will look better"
+                ],
+                correct: 2,
+                explanation: "Sharing your location can allow strangers to track your movements, find out where you live, or know when you're not at home, which poses a safety risk."
+            },
+            {
+                question: "What does 'digital footprint' mean?",
+                options: [
+                    "The size of your computer's hard drive",
+                    "Footprints you leave when walking while looking at your phone",
+                    "The trail of data you leave behind when using the internet",
+                    "A special type of emoji"
+                ],
+                correct: 2,
+                explanation: "Your digital footprint is all the information about you that exists online as a result of your activity - including posts, comments, photos, and searches."
+            },
+            {
+                question: "What is the best type of password to use?",
+                options: [
+                    "Your name and birthday (e.g., Emma2012)",
+                    "A simple word like 'password' or '123456'",
+                    "A mix of letters, numbers, and symbols that's hard to guess",
+                    "The same password for everything so you don't forget it"
+                ],
+                correct: 2,
+                explanation: "Strong passwords use a combination of uppercase and lowercase letters, numbers, and symbols. They should be unique for each account and not contain personal information."
+            },
+            {
+                question: "If someone you don't know sends you a friend request online, what should you do?",
+                options: [
+                    "Accept it - they might become a good friend",
+                    "Ignore or decline it, and tell a trusted adult if it concerns you",
+                    "Accept it but don't talk to them",
+                    "Ask them for personal information to check who they are"
+                ],
+                correct: 1,
+                explanation: "You should never accept friend requests from strangers. People online may not be who they claim to be. Always talk to a trusted adult if you're unsure."
+            },
+            {
+                question: "What is 'phishing'?",
+                options: [
+                    "A popular online game about fishing",
+                    "A scam where criminals try to trick you into giving away personal information",
+                    "A way to make friends online",
+                    "A type of social media filter"
+                ],
+                correct: 1,
+                explanation: "Phishing is when scammers send fake emails, messages, or create fake websites to trick people into revealing passwords, bank details, or other personal information."
+            },
+            {
+                question: "What should you do if you see cyberbullying happening to someone else?",
+                options: [
+                    "Join in so you don't become a target yourself",
+                    "Ignore it - it's not your problem",
+                    "Screenshot it, don't engage, report it, and support the person being bullied",
+                    "Share it with others to show how bad it is"
+                ],
+                correct: 2,
+                explanation: "Being an 'upstander' means supporting victims, reporting bullying behaviour, and not sharing harmful content. Your actions can make a real difference."
+            },
+            {
+                question: "How long can information you post online potentially last?",
+                options: [
+                    "24 hours like a story",
+                    "A few weeks at most",
+                    "Until you delete it",
+                    "Forever - even deleted content can be saved or screenshotted"
+                ],
+                correct: 3,
+                explanation: "Once something is online, it can be copied, screenshotted, or saved by others before you delete it. Your digital footprint can follow you for life."
+            },
+            {
+                question: "Which information is safe to include in a public online gaming profile?",
+                options: [
+                    "Your school name and year group",
+                    "A nickname or gamertag that doesn't reveal personal details",
+                    "Your full name and age",
+                    "The area where you live"
+                ],
+                correct: 1,
+                explanation: "Use nicknames or gamertags that don't reveal personal information. Never share your real name, school, age, or location in public profiles."
+            },
+            {
+                question: "What is the minimum age requirement for most social media platforms like Instagram and TikTok?",
+                options: [
+                    "10 years old",
+                    "13 years old",
+                    "16 years old",
+                    "There is no age requirement"
+                ],
+                correct: 1,
+                explanation: "Most social media platforms require users to be at least 13 years old. These rules exist to protect younger users from content and interactions that may not be appropriate."
+            },
+            {
+                question: "What should you do if an online 'friend' asks to meet you in person?",
+                options: [
+                    "Agree to meet in a public place",
+                    "Give them your address so they can visit",
+                    "Never agree to meet, and tell a trusted adult immediately",
+                    "Ask them to send a photo first to check they're real"
+                ],
+                correct: 2,
+                explanation: "Never agree to meet someone you only know online. People can pretend to be anyone. Always tell a trusted adult if someone asks to meet you."
+            },
+            {
+                question: "Why is it important to check your privacy settings on social media?",
+                options: [
+                    "To make your profile look more professional",
+                    "Privacy settings don't really matter",
+                    "To control who can see your posts, photos, and personal information",
+                    "To get more followers"
+                ],
+                correct: 2,
+                explanation: "Privacy settings let you control who sees your content and information. Regularly checking them helps keep your personal information safe from strangers."
+            },
+            {
+                question: "What is 'grooming' in an online context?",
+                options: [
+                    "Helping someone with their appearance",
+                    "When an adult builds a relationship with a young person to exploit or abuse them",
+                    "Teaching someone how to use social media",
+                    "Editing photos before posting them"
+                ],
+                correct: 1,
+                explanation: "Online grooming is when someone builds an emotional connection with a young person to gain their trust for harmful purposes. If anyone makes you uncomfortable online, tell a trusted adult."
+            },
+            {
+                question: "If you receive a message saying you've won a prize and need to click a link, what should you do?",
+                options: [
+                    "Click immediately before the offer expires",
+                    "Share it with friends so they can win too",
+                    "Don't click - it's likely a scam. Delete it and tell an adult",
+                    "Reply asking for more information"
+                ],
+                correct: 2,
+                explanation: "Messages about unexpected prizes or winnings are almost always scams. Never click suspicious links - they could install harmful software or steal your information."
+            },
+            {
+                question: "What is one positive way social media can be used?",
+                options: [
+                    "To make fun of people anonymously",
+                    "To connect with friends, family, and communities with shared interests",
+                    "To find out personal information about strangers",
+                    "To pretend to be someone you're not"
+                ],
+                correct: 1,
+                explanation: "Social media can help maintain friendships, connect with family, find communities who share your interests, and even support important causes."
+            },
+            {
+                question: "What should you do if someone online asks you to keep your conversations secret from your parents?",
+                options: [
+                    "Keep it secret - they probably have a good reason",
+                    "This is a warning sign - tell a trusted adult immediately",
+                    "Only keep it secret if they seem nice",
+                    "Ask them why before deciding"
+                ],
+                correct: 1,
+                explanation: "Anyone who asks you to keep your online conversations secret from parents or carers is showing a major warning sign. Always tell a trusted adult right away."
+            },
+            {
+                question: "Why might someone create a fake profile online?",
+                options: [
+                    "Only to play harmless pranks on friends",
+                    "To scam people, bully others, or pretend to be someone they're not",
+                    "Fake profiles don't exist on major platforms",
+                    "Because they forgot their old password"
+                ],
+                correct: 1,
+                explanation: "Fake profiles can be used for scams, bullying, catfishing, or grooming. This is why you should be cautious about people you don't know in real life."
+            },
+            {
+                question: "What does 'CEOP' stand for and what do they do?",
+                options: [
+                    "Computer and Electronic Online Protection - they fix computers",
+                    "Child Exploitation and Online Protection - they help keep children safe online",
+                    "Central European Online Platform - a social media site",
+                    "Cyber Emergency Operations Protocol - they investigate hackers"
+                ],
+                correct: 1,
+                explanation: "CEOP is part of the National Crime Agency and works to keep children and young people safe from sexual abuse and grooming online. You can report concerns to them directly."
+            },
+            {
+                question: "What is 'screen time' and why does it matter?",
+                options: [
+                    "The brightness of your screen - it affects your battery",
+                    "The amount of time spent using digital devices - too much can affect wellbeing",
+                    "The size of your phone screen",
+                    "It doesn't matter at all"
+                ],
+                correct: 1,
+                explanation: "Screen time refers to how long you spend on devices. Too much can affect sleep, physical activity, mental health, and relationships. Balance is important."
+            },
+            {
+                question: "If you accidentally access inappropriate content online, what should you do?",
+                options: [
+                    "Keep looking to understand what it is",
+                    "Share it with friends to warn them",
+                    "Close it immediately and tell a trusted adult - it's not your fault",
+                    "Try to find more information about it"
+                ],
+                correct: 2,
+                explanation: "If you accidentally see something inappropriate, close it straight away and tell a trusted adult. It's not your fault, and you won't get in trouble for telling someone."
+            }
+        ];
+
+        // Bank of 20 Real-Life Scenarios
+        const scenarioQuestions = [
+            {
+                context: "Jamie, 12, from Edinburgh, posted a selfie in school uniform celebrating making the football team. The post included the school badge clearly visible and mentioned the upcoming match location and time.",
+                question: "What risks has Jamie created by posting this?",
+                options: [
+                    "No risks - it's just a celebration photo",
+                    "Strangers could identify the school, know where Jamie will be, and when",
+                    "The only risk is that friends might be jealous",
+                    "The school might not like the free advertising"
+                ],
+                correct: 1,
+                explanation: "Jamie has shared personal information that could help strangers identify and locate them. School uniforms, locations, and schedules should not be shared publicly online."
+            },
+            {
+                context: "Aisha received a DM on Instagram from someone claiming to be a talent scout who had seen her dance videos. They asked her to send more videos and wanted to arrange a private meeting to discuss 'opportunities'.",
+                question: "What should Aisha do?",
+                options: [
+                    "Send more videos - this could be a great opportunity",
+                    "Arrange to meet in a public place to be safe",
+                    "Not respond, block the account, and tell a parent or teacher immediately",
+                    "Ask for proof they're a real talent scout before meeting"
+                ],
+                correct: 2,
+                explanation: "This shows classic signs of grooming - flattery, asking for content, and requesting private meetings. Aisha should not respond and must tell a trusted adult immediately."
+            },
+            {
+                context: "In a group chat, some of Callum's classmates started sharing mean memes about another pupil called Megan. Everyone was adding laughing emojis and Callum felt pressured to join in.",
+                question: "What is the best thing for Callum to do?",
+                options: [
+                    "Add a laughing emoji so he doesn't stand out",
+                    "Leave the chat quietly and pretend he didn't see anything",
+                    "Don't participate, privately message Megan to offer support, and report the chat to a teacher",
+                    "Create a meme about someone else to change the subject"
+                ],
+                correct: 2,
+                explanation: "Callum should be an 'upstander' - refuse to participate, support Megan, and report the bullying. Being a bystander or joining in makes the situation worse."
+            },
+            {
+                context: "Sophie received an email that looked like it was from TikTok saying her account would be deleted unless she clicked a link and verified her password immediately.",
+                question: "What should Sophie do?",
+                options: [
+                    "Click the link quickly before her account gets deleted",
+                    "Forward the email to friends to warn them",
+                    "Don't click any links, check the real TikTok app/website directly, and tell an adult",
+                    "Reply to the email asking if it's real"
+                ],
+                correct: 2,
+                explanation: "This is a phishing scam. Legitimate companies never ask for passwords via email. Sophie should go directly to the real app to check her account and report the suspicious email."
+            },
+            {
+                context: "Rory met someone on an online game who seemed really cool and shared the same interests. After a few weeks of chatting, they asked Rory which school he went to and what area of Glasgow he lived in.",
+                question: "How should Rory respond?",
+                options: [
+                    "Share the information - they're friends now and it's just conversation",
+                    "Only share the general area, not the exact school",
+                    "Not share any personal details, and tell a parent that someone online is asking for this information",
+                    "Make up a fake school and area to keep chatting"
+                ],
+                correct: 2,
+                explanation: "Even after weeks of friendly chat, online 'friends' are still strangers. Asking for school and location details is a red flag. Rory should tell a trusted adult."
+            },
+            {
+                context: "Emma's friend took an embarrassing video of her falling over at a party and posted it on TikTok without asking. It's getting lots of views and mean comments.",
+                question: "What should Emma do?",
+                options: [
+                    "Post an embarrassing video of her friend to get revenge",
+                    "Just ignore it - it will blow over eventually",
+                    "Ask her friend to remove it, report the video to TikTok, and talk to a trusted adult",
+                    "Comment on the video defending herself"
+                ],
+                correct: 2,
+                explanation: "Emma should ask for the video to be removed, use the platform's reporting tools, and involve a trusted adult. Revenge or engaging with mean comments will make things worse."
+            },
+            {
+                context: "Lewis, 11, really wants to join Snapchat because all his friends use it. His parents said no because he's under 13, but his friends are saying he should just put a fake birthday.",
+                question: "What should Lewis do?",
+                options: [
+                    "Use a fake birthday - everyone does it and it's no big deal",
+                    "Respect his parents' decision and wait until he's old enough",
+                    "Create an account in secret and just not tell his parents",
+                    "Get an older sibling to create an account for him"
+                ],
+                correct: 1,
+                explanation: "Age restrictions exist to protect young people. Lewis should respect his parents' decision. Using platforms before you're ready can expose you to risks and content that isn't appropriate."
+            },
+            {
+                context: "Fatima noticed that a classmate has been posting worrying messages on social media about feeling hopeless and not wanting to be around anymore.",
+                question: "What should Fatima do?",
+                options: [
+                    "Comment on the posts telling them to cheer up",
+                    "Ignore it - they're probably just looking for attention",
+                    "Take the posts seriously, check on her classmate, and immediately tell a trusted adult",
+                    "Share the posts to ask others what they think"
+                ],
+                correct: 2,
+                explanation: "These posts could indicate serious mental health struggles. Fatima should take them seriously, offer support, and immediately tell a trusted adult who can help - this could save a life."
+            },
+            {
+                context: "Kieran received a message from someone offering him free V-Bucks for Fortnite if he clicked a link and entered his account details.",
+                question: "What should Kieran do?",
+                options: [
+                    "Click the link - free V-Bucks would be amazing",
+                    "Share the link with friends so they can get free V-Bucks too",
+                    "Recognise this as a scam, don't click, and report the message",
+                    "Enter fake details to test if it's real"
+                ],
+                correct: 2,
+                explanation: "There's no such thing as 'free V-Bucks' from random messages - this is a common scam to steal account details or install malware. Kieran should never click suspicious links."
+            },
+            {
+                context: "In 2023, a Scottish school had to send warnings to parents after pupils were sharing AI-generated fake images of classmates in inappropriate situations.",
+                question: "If you discovered someone was making AI fake images of classmates, what should you do?",
+                options: [
+                    "Ask to see the images out of curiosity",
+                    "Keep quiet - you don't want to be seen as a 'grass'",
+                    "Report it immediately to a teacher - creating fake inappropriate images of real people is illegal and harmful",
+                    "Tell the person making them that it's not cool but don't report it"
+                ],
+                correct: 2,
+                explanation: "Creating fake intimate or inappropriate images of real people - including using AI - is illegal and can be considered image-based abuse. This must be reported to adults immediately."
+            },
+            {
+                context: "Amy keeps getting messages from a boy in her year asking her to send photos of herself. He says everyone does it and promises he won't share them. Amy feels uncomfortable but doesn't want to seem 'boring'.",
+                question: "What should Amy do?",
+                options: [
+                    "Send the photos - he promised not to share them",
+                    "Send just one photo to see if he keeps his promise",
+                    "Trust her instincts, refuse firmly, block him if needed, and tell a trusted adult",
+                    "Ask her friends what they would do"
+                ],
+                correct: 2,
+                explanation: "Anyone who pressures you to send photos is not respecting you. Promises not to share are meaningless - images can easily be saved and spread. Amy should trust her discomfort and tell an adult."
+            },
+            {
+                context: "After falling out with her friend group, Isla discovered they had created a fake Instagram account using her photos and were posting embarrassing fake content pretending to be her.",
+                question: "What should Isla do?",
+                options: [
+                    "Create a fake account of one of them to get revenge",
+                    "Try to guess the password and delete the account herself",
+                    "Report the fake account to Instagram, screenshot evidence, and tell her parents and school",
+                    "Ignore it and hope they get bored"
+                ],
+                correct: 2,
+                explanation: "Impersonation is a serious form of cyberbullying. Isla should report the account to the platform, keep evidence, and involve adults. Taking revenge would only make things worse."
+            },
+            {
+                context: "Cameron is in a WhatsApp group where older teenagers have started sharing links to websites with violent content. He feels uncomfortable but doesn't want to be called a 'wimp'.",
+                question: "What should Cameron do?",
+                options: [
+                    "Watch the content so he can join in the conversations",
+                    "Stay in the group but just ignore those messages",
+                    "Leave the group, don't watch the content, and talk to a trusted adult about what's happening",
+                    "Make fun of the content to fit in without actually watching it"
+                ],
+                correct: 2,
+                explanation: "Cameron should trust his discomfort. Violent content can be harmful and distressing. Leaving the group and talking to an adult is the right thing to do - real friends wouldn't pressure him."
+            },
+            {
+                context: "Scottish police reported cases where young people received messages from strangers offering money for 'modelling photos', starting with normal poses but gradually requesting more revealing images.",
+                question: "If someone online offered you money for photos, what should you do?",
+                options: [
+                    "Only agree to normal photos with clothes on",
+                    "Ask for payment first to check if they're serious",
+                    "Refuse completely, block them, and report to CEOP and tell a trusted adult",
+                    "Ignore the message but don't report it"
+                ],
+                correct: 2,
+                explanation: "This is a known grooming technique. Offers of money for photos from strangers are always dangerous. Report to CEOP (ceop.police.uk) and tell a trusted adult immediately."
+            },
+            {
+                context: "Liam found out that screenshots of a private conversation he had with his girlfriend were being shared around the school, taken out of context to embarrass him.",
+                question: "What should Liam do?",
+                options: [
+                    "Share private conversations about the people sharing his screenshots",
+                    "Confront everyone involved publicly on social media",
+                    "Report it to a teacher, ask for help removing the screenshots, and have a conversation with his girlfriend about privacy",
+                    "Delete all his social media accounts"
+                ],
+                correct: 2,
+                explanation: "Liam should involve trusted adults to help stop the sharing and address the breach of trust. Public confrontation or revenge would escalate the situation."
+            },
+            {
+                context: "During online classes, some pupils discovered they could unmute themselves and disrupt lessons, or share inappropriate images in the chat when the teacher wasn't looking.",
+                question: "What should you do if you see this happening?",
+                options: [
+                    "Join in - it's just a bit of fun and breaks up boring lessons",
+                    "Watch but don't participate",
+                    "Don't participate, and privately let the teacher know what's happening",
+                    "Screenshot it and share with friends who aren't in the class"
+                ],
+                correct: 2,
+                explanation: "Disrupting online lessons affects everyone's learning and sharing inappropriate content is harmful. Letting the teacher know helps them address the issue without you being seen as 'telling tales'."
+            },
+            {
+                context: "Zara's online friend, who she's been chatting to for months, revealed they were actually 22, not 14 as they'd claimed. They said it 'doesn't matter' because they're 'basically the same age mentally' and want to keep chatting.",
+                question: "What should Zara do?",
+                options: [
+                    "Keep chatting - they've been friends for months and age is just a number",
+                    "Be more careful but continue the friendship",
+                    "Stop all contact immediately, don't delete the messages, and tell a parent and report to CEOP",
+                    "Ask them why they lied before deciding what to do"
+                ],
+                correct: 2,
+                explanation: "An adult lying about their age to befriend a young person is a serious red flag for grooming. Zara should stop contact, preserve evidence, tell a parent, and report to CEOP immediately."
+            },
+            {
+                context: "Several pupils at a Dundee school were caught using their phones to secretly film teachers and posting mocking videos online with cruel captions.",
+                question: "Why is this behaviour harmful and what could happen?",
+                options: [
+                    "It's just a laugh - teachers should have a sense of humour",
+                    "It's only harmful if the teacher finds out",
+                    "It's harassment, illegal to film without consent, and pupils could face school discipline and potentially police involvement",
+                    "It's fine as long as you don't show their face"
+                ],
+                correct: 2,
+                explanation: "Secretly filming anyone and posting mocking content is harassment. Teachers are people too and deserve respect. This can result in serious school consequences and legal action."
+            },
+            {
+                context: "At a school in Aberdeen, pupils were pressured into joining a viral 'challenge' that involved dangerous stunts. Some felt they had to participate or face being called 'chicken' online.",
+                question: "What's the safest way to handle pressure to join dangerous online challenges?",
+                options: [
+                    "Do a safer version of the challenge to still be included",
+                    "Just do it once so people stop pressuring you",
+                    "Refuse clearly, remember that real friends don't pressure you into danger, and tell an adult if the pressure continues",
+                    "Film yourself pretending to do it without actually doing it"
+                ],
+                correct: 2,
+                explanation: "No online challenge is worth risking your safety. Real friends respect when you say no. Tell an adult if you're being pressured - peer pressure around dangerous challenges is serious."
+            },
+            {
+                context: "Megan noticed her younger brother (age 8) was chatting with strangers on Roblox who were asking him personal questions and sending friend requests to other platforms.",
+                question: "What should Megan do?",
+                options: [
+                    "Tell her brother not to talk to strangers but don't worry too much",
+                    "Mind her own business - it's her brother's account",
+                    "Tell her parents immediately and help her brother understand why this is dangerous",
+                    "Just block the strangers on his account and not tell anyone"
+                ],
+                correct: 2,
+                explanation: "Adults targeting young children across multiple platforms is a serious grooming warning sign. Megan should tell her parents immediately so they can protect her brother and report the behaviour."
+            }
+        ];
+
+        // Global variables
+        let currentQuestions = [];
+        let currentType = '';
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        // DOM elements
+        const startQuestionsBtn = document.getElementById('startQuestions');
+        const startScenariosBtn = document.getElementById('startScenarios');
+        const resetBtn = document.getElementById('resetQuiz');
+        const quizSection = document.getElementById('quizSection');
+        const questionsContainer = document.getElementById('questionsContainer');
+        const progressFill = document.getElementById('progressFill');
+        const scoreContainer = document.getElementById('scoreContainer');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const scoreMessage = document.getElementById('scoreMessage');
+        const introBox = document.getElementById('introBox');
+
+        // Shuffle array function
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Get random questions
+        function getRandomQuestions(bank, count) {
+            const shuffled = shuffleArray(bank);
+            return shuffled.slice(0, count);
+        }
+
+        // Create question HTML
+        function createQuestionHTML(q, index, isScenario) {
+            const cardClass = isScenario ? 'question-card scenario-card' : 'question-card';
+            const label = isScenario ? 'Scenario' : 'Question';
+            
+            let html = `
+                <div class="${cardClass}" id="question-${index}">
+                    <span class="question-number">${label} ${index + 1} of 5</span>
+            `;
+            
+            if (isScenario && q.context) {
+                html += `<div class="scenario-context">${q.context}</div>`;
+            }
+            
+            html += `
+                    <p class="question-text">${q.question}</p>
+                    <div class="options">
+            `;
+            
+            q.options.forEach((option, optIndex) => {
+                html += `
+                    <button class="option-btn" data-question="${index}" data-option="${optIndex}">
+                        ${option}
+                    </button>
+                `;
+            });
+            
+            html += `
+                    </div>
+                    <div class="feedback" id="feedback-${index}"></div>
+                </div>
+            `;
+            
+            return html;
+        }
+
+        // Handle answer selection
+        function handleAnswer(questionIndex, selectedOption) {
+            const question = currentQuestions[questionIndex];
+            const questionCard = document.getElementById(`question-${questionIndex}`);
+            const options = questionCard.querySelectorAll('.option-btn');
+            const feedback = document.getElementById(`feedback-${questionIndex}`);
+            
+            // Disable all options
+            options.forEach(opt => opt.disabled = true);
+            
+            const isCorrect = selectedOption === question.correct;
+            
+            // Style selected option
+            options[selectedOption].classList.add(isCorrect ? 'correct' : 'incorrect');
+            
+            // If incorrect, show the correct answer
+            if (!isCorrect) {
+                options[question.correct].classList.add('show-correct');
+            }
+            
+            // Show feedback
+            if (isCorrect) {
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `<span class="feedback-icon">✅</span> <strong>Correct!</strong> ${question.explanation}`;
+                correctCount++;
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `<span class="feedback-icon">❌</span> <strong>Not quite.</strong> ${question.explanation}`;
+            }
+            
+            answeredCount++;
+            updateProgress();
+            
+            // Check if quiz is complete
+            if (answeredCount === 5) {
+                setTimeout(showScore, 1000);
+            }
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const percentage = (answeredCount / 5) * 100;
+            progressFill.style.width = `${percentage}%`;
+        }
+
+        // Show final score
+        function showScore() {
+            scoreContainer.style.display = 'block';
+            scoreDisplay.textContent = `${correctCount}/5`;
+            
+            let message = '';
+            if (correctCount === 5) {
+                message = '🌟 Excellent! You really know your stuff about online safety!';
+            } else if (correctCount >= 4) {
+                message = '👏 Great job! You have a strong understanding of digital safety.';
+            } else if (correctCount >= 3) {
+                message = '👍 Good effort! Review the explanations to strengthen your knowledge.';
+            } else if (correctCount >= 2) {
+                message = '📚 Keep learning! Online safety is important - review the explanations above.';
+            } else {
+                message = '💪 Don\'t worry - read through the explanations and try again!';
+            }
+            
+            scoreMessage.textContent = message;
+            scoreContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Start quiz
+        function startQuiz(type) {
+            currentType = type;
+            answeredCount = 0;
+            correctCount = 0;
+            
+            const isScenario = type === 'scenarios';
+            const bank = isScenario ? scenarioQuestions : knowledgeQuestions;
+            currentQuestions = getRandomQuestions(bank, 5);
+            
+            // Update UI
+            introBox.style.display = 'none';
+            startQuestionsBtn.style.display = 'none';
+            startScenariosBtn.style.display = 'none';
+            resetBtn.style.display = 'inline-block';
+            quizSection.classList.add('active');
+            scoreContainer.style.display = 'none';
+            progressFill.style.width = '0%';
+            
+            // Generate questions HTML
+            let html = '';
+            currentQuestions.forEach((q, index) => {
+                html += createQuestionHTML(q, index, isScenario);
+            });
+            questionsContainer.innerHTML = html;
+            
+            // Add event listeners to options
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const questionIndex = parseInt(this.dataset.question);
+                    const optionIndex = parseInt(this.dataset.option);
+                    handleAnswer(questionIndex, optionIndex);
+                });
+            });
+            
+            // Scroll to quiz
+            quizSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Reset quiz
+        function resetQuiz() {
+            introBox.style.display = 'block';
+            startQuestionsBtn.style.display = 'inline-block';
+            startScenariosBtn.style.display = 'inline-block';
+            resetBtn.style.display = 'none';
+            quizSection.classList.remove('active');
+            questionsContainer.innerHTML = '';
+            currentQuestions = [];
+            currentType = '';
+            answeredCount = 0;
+            correctCount = 0;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Event listeners
+        startQuestionsBtn.addEventListener('click', () => startQuiz('questions'));
+        startScenariosBtn.addEventListener('click', () => startQuiz('scenarios'));
+        resetBtn.addEventListener('click', resetQuiz);
+    </script>
+</body>
+</html>
